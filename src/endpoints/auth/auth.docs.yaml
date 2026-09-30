@@ -105,3 +105,163 @@
                   type: string
                   example: "Error details"
     security: []
+/auth/reset-password:
+  post:
+    summary: Reset user password
+    description: Resets a user's password using their email address and a new password.
+    operationId: resetPassword
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+                description: The user's email address.
+              newPassword:
+                type: string
+                description: The new password to set for the user.
+            required:
+              - email
+              - newPassword
+    responses:
+      '200':
+        description: Password reset successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Password reset successfully"
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "User not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Reset password error"
+    security: []
+/auth/token:
+  post:
+    summary: Generate JWT token
+    description: Generates a signed JWT authentication token with custom user details and permissions.
+    operationId: generateToken
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+                description: User ID
+              email:
+                type: string
+                format: email
+                example: "archana@example.com"
+                description: User email address
+              firstName:
+                type: string
+                example: "Archana"
+                description: User first name
+              lastName:
+                type: string
+                example: "Admin"
+                description: User last name
+              role:
+                type: string
+                example: "SuperAdmin"
+                description: User role name
+              permissions:
+                type: array
+                items:
+                  type: string
+                example:
+                  - "GetDepartment"
+                  - "CreateDepartment"
+                  - "UpdateDepartment"
+                  - "DeleteDepartment"
+                description: Array of permissions granted to this token
+            required:
+              - email
+              - firstName
+    responses:
+      '200':
+        description: Token generated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Token generated successfully"
+                accessToken:
+                  type: string
+                  description: The signed JWT access token
+                tokenExpiry:
+                  type: integer
+                  description: Expiration time as Unix timestamp
+                user:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    role:
+                      type: string
+                    permissions:
+                      type: array
+                      items:
+                        type: string
+      '400':
+        description: Bad request, validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "A valid email is required"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error generating authentication token"
+    security: []
+

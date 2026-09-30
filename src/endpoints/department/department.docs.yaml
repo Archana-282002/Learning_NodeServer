@@ -1,0 +1,299 @@
+/departments:
+  get:
+    summary: Get all departments
+    description: Retrieves a list of all departments.
+    operationId: getAllDepartments
+    security:
+      - bearerAuth: []
+    tags:
+      - Departments
+    responses:
+      200:
+        description: List of all departments
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                departments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Engineering"
+                      code:
+                        type: string
+                        example: "ENG"
+                      description:
+                        type: string
+                        example: "Software development and engineering operations"
+                      createdBy:
+                        type: integer
+                        example: 1
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department get error"
+                error:
+                  type: string
+
+  post:
+    summary: Create a new department
+    description: Creates a new department record.
+    operationId: createDepartment
+    security:
+      - bearerAuth: []
+    tags:
+      - Departments
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - code
+            properties:
+              name:
+                type: string
+                example: "Engineering"
+              code:
+                type: string
+                example: "ENG"
+              description:
+                type: string
+                example: "Software development and engineering operations"
+    responses:
+      201:
+        description: Department created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department created successfully"
+                department:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Engineering"
+                    code:
+                      type: string
+                      example: "ENG"
+                    description:
+                      type: string
+                      example: "Software development and engineering operations"
+                    createdBy:
+                      type: integer
+                      example: 1
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department creation error"
+                error:
+                  type: string
+
+/departments/{id}:
+  get:
+    summary: Get a department by ID
+    description: Retrieves details of a specific department by ID.
+    operationId: getDepartmentById
+    security:
+      - bearerAuth: []
+    tags:
+      - Departments
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the department to retrieve
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Department retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                department:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Engineering"
+                    code:
+                      type: string
+                      example: "ENG"
+                    description:
+                      type: string
+                      example: "Software development and engineering operations"
+      404:
+        description: Department not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department not found"
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department get error"
+
+  put:
+    summary: Update a department
+    description: Updates an existing department by ID.
+    operationId: updateDepartment
+    security:
+      - bearerAuth: []
+    tags:
+      - Departments
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the department to update
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Information Technology"
+              code:
+                type: string
+                example: "IT"
+              description:
+                type: string
+                example: "Corporate IT systems and cloud infrastructure"
+    responses:
+      200:
+        description: Department updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department updated successfully"
+                department:
+                  type: object
+      404:
+        description: Department not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department not found"
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department update error"
+
+  delete:
+    summary: Delete a department
+    description: Deletes a department by ID.
+    operationId: deleteDepartment
+    security:
+      - bearerAuth: []
+    tags:
+      - Departments
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the department to delete
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Department deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department deleted successfully"
+      404:
+        description: Department not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department not found"
+      500:
+        description: Server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Department deletion error"

@@ -7,6 +7,8 @@ import {
 import { createServer } from 'app';
 import { initPubSub } from 'pubsub';
 import * as models from 'db/models';
+import { initRedis } from './redis';
+
 
 // Handle unhandled promise rejections to prevent crashes from database issues
 process.on('unhandledRejection', (reason) => {
@@ -25,6 +27,15 @@ createServer()
   .init()
   .then(async () => {
     reportInfo('HTTP server started successfully');
+
+    // Start Redis
+    try {
+      await initRedis();
+    } catch (redisError) {
+      reportError('Failed to initialize Redis (service will continue with DB fallback)');
+      reportError(redisError);
+    }
+
    
     const shouldInitDb = process.env.RUN_DB_MIGRATION?.toLowerCase() === 'true';
     

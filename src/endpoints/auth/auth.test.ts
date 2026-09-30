@@ -3,9 +3,9 @@ import sinon from 'sinon';
 import bcrypt from 'bcryptjs';
 import { createMockRequest, createMockResponse } from 'test/stubs';
 import { User } from 'db/models';
-import { loginHandler } from './auth.handler';
-import { AUTH_INVALID_CREDENTIALS, AUTH_USER_NOT_FOUND, AUTH_LOGIN_ERROR } from './auth.const';
-import { loginValidator } from './auth.validator';
+import { loginHandler, resetPasswordHandler } from './auth.handler';
+import { AUTH_INVALID_CREDENTIALS, AUTH_USER_NOT_FOUND, AUTH_LOGIN_ERROR, AUTH_RESET_PASSWORD_SUCCESS, AUTH_RESET_PASSWORD_ERROR } from './auth.const';
+import { loginValidator, resetPasswordValidator } from './auth.validator';
 
 describe('Auth Endpoints', () => {
   describe('Auth Constants', () => {
@@ -13,6 +13,8 @@ describe('Auth Endpoints', () => {
       expect(AUTH_USER_NOT_FOUND).to.equal('User not found');
       expect(AUTH_INVALID_CREDENTIALS).to.equal('Invalid credentials');
       expect(AUTH_LOGIN_ERROR).to.equal('Login error');
+      expect(AUTH_RESET_PASSWORD_SUCCESS).to.equal('Password reset successfully');
+      expect(AUTH_RESET_PASSWORD_ERROR).to.equal('Reset password error');
     });
   });
 
@@ -29,6 +31,16 @@ describe('Auth Endpoints', () => {
       expect(loginValidator.password.in).to.equal('body');
       expect(loginValidator.password.exists).to.exist;
     });
+
+    it('should validate resetPassword fields correctly', () => {
+      expect(resetPasswordValidator.email).to.exist;
+      expect(resetPasswordValidator.email.in).to.equal('body');
+      expect(resetPasswordValidator.email.isEmail).to.exist;
+
+      expect(resetPasswordValidator.newPassword).to.exist;
+      expect(resetPasswordValidator.newPassword.in).to.equal('body');
+      expect(resetPasswordValidator.newPassword.exists).to.exist;
+    });
   });
 
   describe('Auth Handlers', () => {
@@ -41,7 +53,8 @@ describe('Auth Endpoints', () => {
     req = createMockRequest({
       body: {
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
+        newPassword: 'newPassword123'
       }
     });
     res = createMockResponse();
@@ -208,5 +221,52 @@ describe('Auth Endpoints', () => {
       );
     });
   });
+
+  describe('Reset Password Handler', () => {
+    it('should reset password successfully when user exists', async () => {
+      const mockUserInstance = {
+        id: '123',
+        email: 'test@example.com'
+      };
+
+      findOneStub.resolves(mockUserInstance);
+      sinon.stub(bcrypt, 'hash').resolves('newHashedPassword' as any);
+      const updateStub = sinon.stub(User, 'update').resolves([1] as any);
+
+      await resetPasswordHandler(req, res);
+
+      expect(res.status).to.have.been.calledWith(200);
+      expect(res.json).to.have.been.calledWith({ message: AUTH_RESET_PASSWORD_SUCCESS });
+      expect(updateStub).to.have.been.calledWith(
+        { password: 'newHashedPassword' },
+        { where: { email: 'test@example.com' } }
+      );
+    });
+
+    it('should return 404 when user is not found', async () => {
+      findOneStub.resolves(null);
+
+      await resetPasswordHandler(req, res);
+
+      expect(res.status).to.have.been.calledWith(404);
+      expect(res.json).to.have.been.calledWith({ message: AUTH_USER_NOT_FOUND });
+    });
+
+    it('should return 500 on error', async () => {
+      const error = new Error('DB Error');
+      findOneStub.rejects(error);
+
+      await resetPasswordHandler(req, res);
+
+      expect(res.status).to.have.been.calledWith(500);
+      expect(res.json).to.have.been.calledWith(
+        sinon.match({
+          message: AUTH_RESET_PASSWORD_ERROR,
+          error
+        })
+      );
+    });
+  });
   });
 });
+
